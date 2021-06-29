@@ -1,0 +1,40 @@
+hosts: all
+  become: yes
+  become_user: root
+  become_method: sudo
+  tasks:
+    - name: Enable nginx for amazon linux 2
+      shell: "amazon-linux-extras enable nginx1.12"
+      become: yes
+
+    - name: Instalar nginx
+      yum:
+        name: nginx
+        state: latest
+
+    - name: Copiar config files nginx
+      copy:
+        src: "./files/nginx.conf"
+        dest: "/etc/nginx/nginx.conf"
+        mode: 0644
+
+    - name: Criar diretorio
+      file: 
+        path: "/var/www/andretena.com.br"
+        state: directory
+
+    - name: Copiar staticos
+      copy:
+        src: "./files/static_website/"
+        dest: "/var/www/andretena.com.br/"
+        mode: 0644
+
+    - name: Update static nginx config
+      copy: 
+        src: "./files/static_website.conf"
+        dest: "/etc/nginx/conf.d/andretena.com.br.conf"
+        mode: 0644
+
+    - name: Restart Nginx
+      service: name=nginx state=restarted
+      become: yes
